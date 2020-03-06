@@ -16,4 +16,17 @@ export default {
 </script>
 <style lang="scss">
 @import "assets/css/base.css";
+
+.swiper-pagination-bullet {
+    width: 20px !important; 
+    height: 20px !important;
+    margin-left:10px;
+    display: inline-block;
+    border-radius: 100%;
+    background: #000;
+    opacity: .2;
+}
+ h2{
+   font-size: 38px;
+ }
 </style>

@@ -47,13 +47,13 @@ export default {
 .tab-ber-item {
   flex: 1;
   text-align: center;
-  height: 49px;
-  font-size: 12px;
+  height: 120px;
+  font-size: 24px;
 }
 .tab-ber-item img {
-  width: 24px;
-  height: 24px;
-  margin-top: 3px;
+  width: 50px;
+  height: 50px;
+  margin-top: 17px;
   vertical-align: middle;
 }
 </style>
