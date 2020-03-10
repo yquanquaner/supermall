@@ -93,7 +93,8 @@ export default {
       // 显示分页器
       if (this.showPagination) {
         param.pagination = {
-          el: this.$refs.pagination
+          el: this.$refs.pagination,
+          clickable: true
         };
       }
       // 创建swiper
@@ -125,13 +126,14 @@ export default {
 
 <style scoped>
 .swiper-pagination {
-  width:148px;
-  height:43px;
+  width: 148px;
+  height: 43px;
   position: absolute;
   top: 342px;
   left: 0;
   right: 0;
   bottom: 0;
   margin: auto;
+  z-index: 8;
 }
 </style>

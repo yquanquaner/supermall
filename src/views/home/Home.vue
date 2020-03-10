@@ -3,73 +3,150 @@
     <nav-bar class="home_nav">
       <div slot="center">购物街</div>
     </nav-bar>
-    <div v-if="banner.length>0">
-      <swiper class="swipe" ref="banner" :showPagination="true" :spaceBetween="10" slidesPerView="auto" :loop="true" :autoplay="true" :disableOnInteraction="false">
-        <div v-for="(item,index) of banner" :key="index" slot="swiper-con">
-          <a :href="item.link">
-            <img :src="item.image" :alt="item.title" />
-          </a>
-        </div>
-      </swiper>
-    </div>
+    <scroll class="content">
+      <div v-if="banner.length>0">
+        <home-swiper :banner="banner"></home-swiper>
+      </div>
+      <recommend-view :recommend="recommend"></recommend-view>
+      <feature-view></feature-view>
+      <tab-control class="tab-control" :titles="['流行','新款','精选']" @tabClick="tabClick"></tab-control>
+      <good-list :goods="showGoods"></good-list>
+    </scroll>
+    <back-top></back-top>
   </div>
 </template>
 
 <script>
+import HomeSwiper from "./childComps/HomeSwiper";
+import RecommendView from "./childComps/RecommendView";
+import FeatureView from "./childComps/FeatureView";
+
 import NavBar from "components/common/navbar/NavBar";
-import { getHomeMultidata } from "network/home";
-import Swiper from "components/common/swiper/Swiper";
+import TabControl from "components/content/tabControl/TabControl";
+import GoodList from "components/content/goods/GoodsList";
+import Scroll from "components/common/scroll/Scroll";
+import BackTop from "components/content/backtop/BackTop"
+
+import { getHomeMultidata, getHomeGoods } from "network/home";
+
 export default {
   name: "Home",
   components: {
+    HomeSwiper,
+    RecommendView,
+    FeatureView,
     NavBar,
-    Swiper
+    TabControl,
+    GoodList,
+    Scroll,
+    BackTop
   },
 
   data() {
     return {
       banner: [],
-      dkeyword: [],
-      keywords: [],
-      recommend: []
+      recommend: [],
+      goods: {
+        pop: { page: 0, list: [] },
+        new: { page: 0, list: [] },
+        sell: { page: 0, list: [] }
+      },
+      currentType: "pop"
     };
   },
 
-  mounted() {
-
+  mounted() {},
+  computed: {
+    showGoods() {
+      return this.goods[this.currentType].list;
+    }
   },
-
   created() {
     /* 1.请求多个数据 */
-    getHomeMultidata()
-      .then(res => {
-        console.log("created -> res", res.data.data);
-        this.banner = res.data.data.banner.list;
-        this.dkeyword = res.data.data.dKeyword;
-        this.keywords = res.data.data.keywords;
-        this.recommend = res.data.data.recommend.list;
-        console.log("请求完毕");
-      })
-      .catch(err => {
-        console.log(err);
-      });
+    this.getHomeMultidata();
+    // 2.请求商品数据
+    this.getHomeGoods("pop");
+    this.getHomeGoods("new");
+    this.getHomeGoods("sell");
+  },
+  methods: {
+    /**
+     * 事件监听相关的方法
+     */
+    tabClick(index) {
+      switch (index) {
+        case 0:
+          this.currentType = "pop";
+          break;
+        case 1:
+          this.currentType = "new";
+          break;
+        case 2:
+          this.currentType = "sell";
+      }
+    },
+    /**
+     * 网络请求相关
+     */
+    getHomeMultidata() {
+      getHomeMultidata()
+        .then(res => {
+          // console.log("created -> res", res.data.data);
+          this.banner = res.data.data.banner.list;
+          this.recommend = res.data.data.recommend.list;
+          // console.log("请求完毕");
+        })
+        .catch(err => {
+          console.log(err);
+        });
+    },
+    getHomeGoods(type) {
+      const page = this.goods[type].page + 1;
+      getHomeGoods(type, page)
+        .then(res => {
+          this.goods[type].list.push(...res.data.data.list);
+          this.goods[type].page += 1;
+        })
+        .catch(err => {
+          console.log(err);
+        });
+    }
   }
 };
 </script>
 
 <style scoped>
+#home {
+  padding-top: 90px;
+  height: 100vh;
+  position: relative;
+}
 .home_nav {
   font-size: 38px;
   background-color: var(--color-tint);
   color: #fff;
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  z-index: 9;
 }
-.swipe {
-  position: relative;
-  width: 100%;
-  height: 388px;
+.tab-control {
+  position: sticky;
+  top: 88px;
+  z-index: 9;
 }
-.swipe img {
-  width: 100%;
+/* .content{
+  height: calc(100% - 210px);
+  overflow: hidden;
+  margin-top:89px;
+} */
+.content{
+  overflow: hidden;
+  position: absolute;
+  top:90px;
+  bottom:120px;
+  left:0;
+  right:0;
 }
-
 </style>
