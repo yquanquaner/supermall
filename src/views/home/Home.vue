@@ -3,7 +3,11 @@
     <nav-bar class="home_nav">
       <div slot="center">购物街</div>
     </nav-bar>
-    <scroll class="content">
+    <scroll class="content" ref="scroll" 
+    :probe-type="3" 
+    @scroll="contentscroll"
+    :pull-up-load="true"
+    @PullingUp="loadMore">
       <div v-if="banner.length>0">
         <home-swiper :banner="banner"></home-swiper>
       </div>
@@ -12,7 +16,7 @@
       <tab-control class="tab-control" :titles="['流行','新款','精选']" @tabClick="tabClick"></tab-control>
       <good-list :goods="showGoods"></good-list>
     </scroll>
-    <back-top></back-top>
+    <back-top @click.native="backClick" v-show="isShowBackTop"></back-top>
   </div>
 </template>
 
@@ -51,7 +55,8 @@ export default {
         new: { page: 0, list: [] },
         sell: { page: 0, list: [] }
       },
-      currentType: "pop"
+      currentType: "pop",
+      isShowBackTop: false
     };
   },
 
@@ -85,6 +90,21 @@ export default {
           this.currentType = "sell";
       }
     },
+
+    backClick(){
+      this.$refs.scroll.scrollTo(0,0);
+    },
+    contentscroll(position){
+      if(position.y<(-1500)){
+        this.isShowBackTop=true
+      }else{
+        this.isShowBackTop=false
+      }
+    },
+    loadMore(){
+      console.log("上拉加载更多")
+      this.getHomeGoods(this.currentType);
+    },
     /**
      * 网络请求相关
      */
@@ -106,6 +126,7 @@ export default {
         .then(res => {
           this.goods[type].list.push(...res.data.data.list);
           this.goods[type].page += 1;
+          this.$refs.scroll.finishPullUp();
         })
         .catch(err => {
           console.log(err);
